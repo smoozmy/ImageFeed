@@ -7,7 +7,7 @@ final class ProfileViewController: UIViewController {
     private lazy var mainStackView: UIStackView = {
         let element = UIStackView()
         element.axis = .vertical
-        element.spacing = 24 
+        element.spacing = 24
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -29,9 +29,19 @@ final class ProfileViewController: UIViewController {
         return element
     }()
     
+    private lazy var favoriteStackView: UIStackView = {
+        let element = UIStackView()
+        element.axis = .horizontal
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
     private lazy var userPhoto: UIImageView = {
         let element = UIImageView()
-        element.image = UIImage(named: "UserPhoto")
+        element.image = UIImage(named: "UserPhotoDefault")
+        element.contentMode = .scaleAspectFill
+        element.layer.cornerRadius = 35
+        element.clipsToBounds = true
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -57,7 +67,7 @@ final class ProfileViewController: UIViewController {
     private lazy var loginLabel: UILabel = {
         let element = UILabel()
         element.text = "@smoozmy"
-        element.font = UIFont.systemFont(ofSize: 13, weight: .bold)
+        element.font = UIFont.systemFont(ofSize: 13)
         element.textColor = .gray
         element.textAlignment = .left
         element.numberOfLines = 1
@@ -68,7 +78,7 @@ final class ProfileViewController: UIViewController {
     private lazy var discriptionLabel: UILabel = {
         let element = UILabel()
         element.text = "Hello, World!"
-        element.font = UIFont.systemFont(ofSize: 13, weight: .bold)
+        element.font = UIFont.systemFont(ofSize: 13)
         element.textColor = .white
         element.textAlignment = .left
         element.numberOfLines = 1
@@ -83,6 +93,19 @@ final class ProfileViewController: UIViewController {
         element.textColor = .white
         element.textAlignment = .left
         element.numberOfLines = 1
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    private lazy var notificationLabel: UILabel = {
+        let element = UILabel()
+        element.backgroundColor = .ypBlue
+        element.text = "0"
+        element.textColor = .ypWhite
+        element.font = UIFont.systemFont(ofSize: 13)
+        element.textAlignment = .center
+        element.layer.cornerRadius = 11
+        element.clipsToBounds = true
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -105,7 +128,11 @@ final class ProfileViewController: UIViewController {
         view.addSubview(mainStackView)
         mainStackView.addArrangedSubview(headerStackView)
         mainStackView.addArrangedSubview(infoStackView)
-        mainStackView.addArrangedSubview(favoriteLabel)
+        mainStackView.addArrangedSubview(favoriteStackView)
+        
+        favoriteStackView.addArrangedSubview(favoriteLabel)
+        favoriteStackView.addArrangedSubview(notificationLabel)
+        
         view.addSubview(noPhotoImage)
         
         headerStackView.addArrangedSubview(userPhoto)
@@ -134,7 +161,12 @@ extension ProfileViewController {
             logoutButton.widthAnchor.constraint(equalToConstant: 24),
             logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             
-            noPhotoImage.topAnchor.constraint(equalTo: favoriteLabel.bottomAnchor, constant: 110),
+            favoriteLabel.heightAnchor.constraint(equalToConstant: 20),
+            
+            notificationLabel.widthAnchor.constraint(equalToConstant: 40),
+            notificationLabel.heightAnchor.constraint(equalToConstant: 22),
+            
+            noPhotoImage.topAnchor.constraint(equalTo: favoriteStackView.bottomAnchor, constant: 110),
             noPhotoImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             noPhotoImage.widthAnchor.constraint(equalToConstant: 100),
             noPhotoImage.heightAnchor.constraint(equalToConstant: 100)
