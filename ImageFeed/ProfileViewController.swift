@@ -1,7 +1,5 @@
 import UIKit
 
-import UIKit
-
 final class ProfileViewController: UIViewController {
     
     // MARK: - UI and Lyfe Cycle
