@@ -16,22 +16,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
         window = UIWindow(windowScene: windowScene)
-        let tabBarController = UITabBarController()
-        tabBarController.viewControllers = [
-            ImagesListViewController(),
-            ProfileViewController()
-        ]
-        tabBarController.viewControllers?.enumerated().forEach {
-            if $0 == 0 {
-                $1.tabBarItem.image = UIImage(named: "MainActive")
-                $1.tabBarItem.title = "Odin"
-            }
-            
-            if $0 == 1 {
-                $1.tabBarItem.image = UIImage(named: "ProfileActive")
-                $1.tabBarItem.title = "Dva "
-            }
-        }
+        
+        let tabBarController = TabBarController()
         window?.rootViewController = tabBarController
         window?.makeKeyAndVisible()
     }

@@ -4,18 +4,18 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
     
+    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    
     // MARK: - UI and Lyfe Cycle
     
     private lazy var tableView: UITableView = {
         let element = UITableView(
-//            frame: .zero,
-//            style: .insetGrouped
         )
         element.backgroundColor = .ypBlack
-//        element.separatorStyle = .none
+        element.separatorStyle = .none
         element.dataSource = self
         element.delegate = self
-        
+        element.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         element.register(
             ImagesListCell.self,
             forCellReuseIdentifier: ImagesListCell.reuseIdentifier
@@ -38,39 +38,56 @@ final class ImagesListViewController: UIViewController {
     
     // MARK: - Actions
     
-    func configCell(for cell: ImagesListCell) { }
-    
+    func configCell(for cell: ImagesListCell, with indexPath: IndexPath)  {
+        guard let image = UIImage(named: photosName[indexPath.row]) else {
+            return
+        }
+        cell.backgroundColor = .clear
+        cell.imageCell.image = image
+        cell.selectionStyle = .none
+        
+        let isLiked = indexPath.row % 2 == 0
+        let likeImage = isLiked ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
+        cell.likeButton.setImage(likeImage, for: .normal)
+    }
 }
 
 extension ImagesListViewController: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        guard let image = UIImage(named: photosName[indexPath.row]) else {
+            return 0
+        }
+        let imageInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16)
+        let imageViewWidth = tableView.bounds.width - imageInsets.left - imageInsets.right
+        let imageWidth = image.size.width
+        let scale = imageViewWidth / imageWidth
+        let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
+        return cellHeight
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        /*
-         Вызывая этот метод у dataSource, таблица узнаёт, сколько ячеек будет в конкретной секции. Номер секции передаётся в параметре numberOfRowsInSection
-         */
-        10
+        photosName.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        /*
-         Основной метод для работы с таблицей. В нём мы создаём ячейку, наполняем её данными и передаём таблице. Таблица вызывает метод dataSource для каждой ячейки.
-         */
-        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) // 1
-                
-                guard let imageListCell = cell as? ImagesListCell else { // 2
-                    return UITableViewCell()
-                }
-                
-                configCell(for: imageListCell) // 3
-                return imageListCell // 4
+        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath)
+        
+        guard let imageListCell = cell as? ImagesListCell else {
+            return UITableViewCell()
+        }
+        
+        configCell(for: imageListCell, with: indexPath)
+        return imageListCell
     }
 }
 
 extension ImagesListViewController: UITableViewDelegate {
-    
-    /*
-     Этот метод отвечает за действия, которые будут выполнены при тапе по ячейке таблицы. «Адрес» ячейки, который содержится в indexPath, передаётся в качестве аргумента. Пока оставьте реализацию метода пустой — он ещё пригодится нам в этом же проекте.
-     */
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) { }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        /*
+         Этот метод отвечает за действия, которые будут выполнены при тапе по ячейке таблицы. «Адрес» ячейки, который содержится в indexPath, передаётся в качестве аргумента. Пока оставьте реализацию метода пустой — он ещё пригодится нам в этом же проекте.
+         */
+    }
     
 }
 

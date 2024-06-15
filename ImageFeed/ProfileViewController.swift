@@ -8,7 +8,7 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .ypRed
+        view.backgroundColor = .ypBlack
         
         setView()
         setupConstraints()
