@@ -2,13 +2,12 @@ import UIKit
 
 final class ImagesListViewController: UIViewController {
     
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
+    private let photosName: [String] = Array(0..<20).map { "\($0)" }
     
-    // MARK: - UI and Lyfe Cycle
+    // MARK: - UI and Life Cycle
     
     private lazy var tableView: UITableView = {
-        let element = UITableView(
-        )
+        let element = UITableView()
         element.backgroundColor = .ypBlack
         element.separatorStyle = .none
         element.dataSource = self
@@ -25,18 +24,19 @@ final class ImagesListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .ypRed
+        view.backgroundColor = .ypBlack
         
         setView()
         setupConstraints()
     }
+    
     private func setView() {
         view.addSubview(tableView)
     }
     
     // MARK: - Actions
     
-    func configCell(for cell: ImagesListCell, with indexPath: IndexPath)  {
+    func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         guard let image = UIImage(named: photosName[indexPath.row]) else {
             return
         }
@@ -82,11 +82,15 @@ extension ImagesListViewController: UITableViewDataSource {
 
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        /*
-         Этот метод отвечает за действия, которые будут выполнены при тапе по ячейке таблицы. «Адрес» ячейки, который содержится в indexPath, передаётся в качестве аргумента. Пока оставьте реализацию метода пустой — он ещё пригодится нам в этом же проекте.
-         */
+        guard let image = UIImage(named: photosName[indexPath.row]) else {
+            return
+        }
+        
+        let singleImageViewController = SingleImageViewController()
+        singleImageViewController.setImage(image)
+        singleImageViewController.modalPresentationStyle = .fullScreen
+        present(singleImageViewController, animated: true, completion: nil)
     }
-    
 }
 
 // MARK: - Constraints
@@ -101,5 +105,3 @@ extension ImagesListViewController {
         ])
     }
 }
-
-
