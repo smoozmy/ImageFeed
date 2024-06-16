@@ -32,6 +32,8 @@ final class ProfileViewController: UIViewController {
     private lazy var favoriteStackView: UIStackView = {
         let element = UIStackView()
         element.axis = .horizontal
+        element.spacing = 8
+        element.alignment = .center
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -110,6 +112,13 @@ final class ProfileViewController: UIViewController {
         return element
     }()
     
+    private lazy var spacer: UIView = {
+        let element = UIView()
+        
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
     private lazy var noPhotoImage: UIImageView = {
         let element = UIImageView()
         element.image = UIImage(named: "NoPhoto")
@@ -132,6 +141,7 @@ final class ProfileViewController: UIViewController {
         
         favoriteStackView.addArrangedSubview(favoriteLabel)
         favoriteStackView.addArrangedSubview(notificationLabel)
+        favoriteStackView.addArrangedSubview(spacer)
         
         view.addSubview(noPhotoImage)
         
@@ -161,7 +171,11 @@ extension ProfileViewController {
             logoutButton.widthAnchor.constraint(equalToConstant: 24),
             logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             
-            favoriteLabel.heightAnchor.constraint(equalToConstant: 20),
+            nameLabel.heightAnchor.constraint(equalToConstant: 18),
+            loginLabel.heightAnchor.constraint(equalToConstant: 18),
+            discriptionLabel.heightAnchor.constraint(equalToConstant: 18),
+            
+            favoriteLabel.heightAnchor.constraint(equalToConstant: 18),
             
             notificationLabel.widthAnchor.constraint(equalToConstant: 40),
             notificationLabel.heightAnchor.constraint(equalToConstant: 22),
