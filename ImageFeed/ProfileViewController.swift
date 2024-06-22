@@ -40,7 +40,7 @@ final class ProfileViewController: UIViewController {
     
     private lazy var userPhoto: UIImageView = {
         let element = UIImageView()
-        element.image = UIImage(named: "UserPhotoDefault")
+        element.image = UIImage(named: "UserPhoto") ?? UIImage(named: "UserPhotoDefault")
         element.contentMode = .scaleAspectFill
         element.layer.cornerRadius = 35
         element.clipsToBounds = true
@@ -51,6 +51,7 @@ final class ProfileViewController: UIViewController {
     private lazy var logoutButton: UIButton = {
         let element = UIButton(type: .custom)
         element.setImage(UIImage(named: "Logout"), for: .normal)
+        element.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -83,7 +84,7 @@ final class ProfileViewController: UIViewController {
         element.font = UIFont.systemFont(ofSize: 13)
         element.textColor = .white
         element.textAlignment = .left
-        element.numberOfLines = 1
+        element.numberOfLines = 0
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -152,6 +153,13 @@ final class ProfileViewController: UIViewController {
         infoStackView.addArrangedSubview(loginLabel)
         infoStackView.addArrangedSubview(discriptionLabel)
     }
+    
+    // MARK: - Actions
+    
+    @objc private func didTapLogoutButton() {
+        
+    }
+    
 }
 
 // MARK: - Constraints
@@ -170,12 +178,6 @@ extension ProfileViewController {
             
             logoutButton.widthAnchor.constraint(equalToConstant: 24),
             logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            
-            nameLabel.heightAnchor.constraint(equalToConstant: 18),
-            loginLabel.heightAnchor.constraint(equalToConstant: 18),
-            discriptionLabel.heightAnchor.constraint(equalToConstant: 18),
-            
-            favoriteLabel.heightAnchor.constraint(equalToConstant: 18),
             
             notificationLabel.widthAnchor.constraint(equalToConstant: 40),
             notificationLabel.heightAnchor.constraint(equalToConstant: 22),

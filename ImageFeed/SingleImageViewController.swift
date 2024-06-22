@@ -46,12 +46,12 @@ final class SingleImageViewController: UIViewController {
     }()
     
     private lazy var backButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        button.tintColor = .ypWhite
-        button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
+        let element = UIButton(type: .system)
+        element.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        element.tintColor = .ypWhite
+        element.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
     }()
     
     override func viewDidLoad() {
@@ -82,7 +82,7 @@ final class SingleImageViewController: UIViewController {
     }
     
     @objc private func didTapLikeButton() {
-        likeButton.setImage(UIImage(named: "LikeСircleActive"), for: .normal)
+        
     }
     
     // MARK: - Public Methods
