@@ -18,6 +18,7 @@ final class AuthViewController: UIViewController {
         element.setTitleColor(.ypBlack, for: .normal)
         element.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .bold)
         element.layer.cornerRadius = 16
+        element.layer.masksToBounds = true
         element.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
         
         element.translatesAutoresizingMaskIntoConstraints = false
