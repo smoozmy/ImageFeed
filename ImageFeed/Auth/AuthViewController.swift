@@ -33,6 +33,7 @@ final class AuthViewController: UIViewController {
         
         setView()
         setupConstraints()
+        configureBackButton()
     }
     private func setView() {
         view.addSubview(logoUnsplash)
@@ -43,7 +44,14 @@ final class AuthViewController: UIViewController {
     
     @objc private func didTapLoginButton() {
         let webViewController = WebViewViewController()
-                navigationController?.pushViewController(webViewController, animated: true)
+        navigationController?.pushViewController(webViewController, animated: true)
+    }
+    
+    private func configureBackButton() {
+        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "Back")
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "Back")
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem?.tintColor = .ypBlack
     }
     
 }
