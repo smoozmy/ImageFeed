@@ -1,6 +1,11 @@
 import UIKit
 import WebKit
 
+protocol WebViewViewControllerDelegate: AnyObject {
+    func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String)
+    func webViewViewControllerDidCancel(_ vc: WebViewViewController)
+}
+
 final class WebViewViewController: UIViewController {
     
     enum WebViewConstants {
@@ -25,10 +30,6 @@ final class WebViewViewController: UIViewController {
         setView()
         setupConstraints()
         loadAuthView()
-        
-//        if let url = URL(string: "https://unsplash.com/oauth/authorize") {
-//            webView.load(URLRequest(url: url))
-//        }
         
     }
     private func setView() {
