@@ -42,7 +42,8 @@ final class AuthViewController: UIViewController {
     // MARK: - Actions
     
     @objc private func didTapLoginButton() {
-        print("login")
+        let webViewController = WebViewViewController()
+                navigationController?.pushViewController(webViewController, animated: true)
     }
     
 }

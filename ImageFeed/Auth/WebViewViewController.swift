@@ -17,6 +17,10 @@ final class WebViewViewController: UIViewController {
         
         setView()
         setupConstraints()
+        
+        if let url = URL(string: "https://www.ya.ru") {
+                    webView.load(URLRequest(url: url))
+                }
     }
     private func setView() {
         view.addSubview(webView)

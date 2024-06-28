@@ -17,10 +17,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window = UIWindow(windowScene: windowScene)
         
-        let tabBarController = TabBarController()
-        window?.rootViewController = tabBarController
-        window?.rootViewController = AuthViewController()
-        window?.makeKeyAndVisible()
+//        let tabBarController = TabBarController()
+//        window?.rootViewController = tabBarController
+//        window?.rootViewController = AuthViewController()
+//        window?.makeKeyAndVisible()
+        
+        let authViewController = AuthViewController()
+               let navigationController = UINavigationController(rootViewController: authViewController)
+               window?.rootViewController = navigationController
+               window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
