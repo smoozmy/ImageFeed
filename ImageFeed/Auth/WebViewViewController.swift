@@ -8,15 +8,19 @@ protocol WebViewViewControllerDelegate: AnyObject {
 
 final class WebViewViewController: UIViewController {
     
-    enum WebViewConstants {
+    private struct WebConstants {
         static let unsplashAuthorizeURLString = "https://unsplash.com/oauth/authorize"
+        static let code = "code"
+        static let authorizedPath = "/oauth/authorize/native"
     }
     
-    // MARK: - UI and Lyfe Cycle
+    weak var delegate: WebViewViewControllerDelegate?
+    
+    // MARK: - UI and Life Cycle
     
     private lazy var webView: WKWebView = {
         let element = WKWebView()
-        
+        element.navigationDelegate = self
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -24,7 +28,6 @@ final class WebViewViewController: UIViewController {
     private lazy var progressView: UIProgressView = {
         let element = UIProgressView()
         element.progressTintColor = .ypBlack
-        
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -33,20 +36,29 @@ final class WebViewViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        webView.navigationDelegate = self
-        
         setView()
         setupConstraints()
         loadAuthView()
-        
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), context: nil)
+    }
+    
     private func setView() {
         view.addSubview(webView)
         view.addSubview(progressView)
     }
     
     private func loadAuthView() {
-        guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
+        guard var urlComponents = URLComponents(string: WebConstants.unsplashAuthorizeURLString) else {
+            print("Failed to create URLComponents")
             return
         }
         
@@ -58,6 +70,7 @@ final class WebViewViewController: UIViewController {
         ]
         
         guard let url = urlComponents.url else {
+            print("Failed to create URL from URLComponents")
             return
         }
         
@@ -65,27 +78,7 @@ final class WebViewViewController: UIViewController {
         webView.load(request)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        webView.addObserver(
-            self,
-            forKeyPath: #keyPath(WKWebView.estimatedProgress),
-            options: .new,
-            context: nil)
-        updateProgress()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        webView.removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), context: nil)
-    }
-    
-    override func observeValue(
-        forKeyPath keyPath: String?,
-        of object: Any?,
-        change: [NSKeyValueChangeKey : Any]?,
-        context: UnsafeMutableRawPointer?
-    ) {
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == #keyPath(WKWebView.estimatedProgress) {
             updateProgress()
         } else {
@@ -97,17 +90,12 @@ final class WebViewViewController: UIViewController {
         progressView.progress = Float(webView.estimatedProgress)
         progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
     }
-    
 }
 
 extension WebViewViewController: WKNavigationDelegate {
-    func webView(
-        _ webView: WKWebView,
-        decidePolicyFor navigationAction: WKNavigationAction,
-        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
-    ) {
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if let code = code(from: navigationAction) {
-            //TODO: process code
+            delegate?.webViewViewController(self, didAuthenticateWithCode: code)
             decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)
@@ -115,13 +103,11 @@ extension WebViewViewController: WKNavigationDelegate {
     }
     
     private func code(from navigationAction: WKNavigationAction) -> String? {
-        if
-            let url = navigationAction.request.url,
-            let urlComponents = URLComponents(string: url.absoluteString),
-            urlComponents.path == "/oauth/authorize/native",
-            let items = urlComponents.queryItems,
-            let codeItem = items.first(where: { $0.name == "code" })
-        {
+        if let url = navigationAction.request.url,
+           let urlComponents = URLComponents(string: url.absoluteString),
+           urlComponents.path == WebConstants.authorizedPath,
+           let items = urlComponents.queryItems,
+           let codeItem = items.first(where: { $0.name == WebConstants.code }) {
             return codeItem.value
         } else {
             return nil
@@ -145,4 +131,3 @@ extension WebViewViewController {
         ])
     }
 }
-

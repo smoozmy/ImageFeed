@@ -1,7 +1,14 @@
 import UIKit
 
+protocol AuthViewControllerDelegate: AnyObject {
+    func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String)
+}
+
 final class AuthViewController: UIViewController {
     
+    private let showWebViewSegueIdentifier = "ShowWebView"
+    
+    weak var delegate: AuthViewControllerDelegate?
     
     private lazy var logoUnsplash: UIImageView = {
         let element = UIImageView()
@@ -35,6 +42,7 @@ final class AuthViewController: UIViewController {
         setupConstraints()
         configureBackButton()
     }
+    
     private func setView() {
         view.addSubview(logoUnsplash)
         view.addSubview(loginButton)
@@ -44,6 +52,7 @@ final class AuthViewController: UIViewController {
     
     @objc private func didTapLoginButton() {
         let webViewController = WebViewViewController()
+        webViewController.delegate = self
         navigationController?.pushViewController(webViewController, animated: true)
     }
     
@@ -57,14 +66,13 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        //TODO: process code
+        delegate?.authViewController(self, didAuthenticateWithCode: code)
     }
-
+    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         dismiss(animated: true)
     }
 }
-
 
 // MARK: - Constraints
 
@@ -80,8 +88,6 @@ extension AuthViewController {
             loginButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             loginButton.heightAnchor.constraint(equalToConstant: 48),
             loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -90)
-            
         ])
     }
 }
-
