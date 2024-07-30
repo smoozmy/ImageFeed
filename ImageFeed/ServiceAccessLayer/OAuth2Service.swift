@@ -3,15 +3,17 @@ import Foundation
 final class OAuth2Service {
     
     static let shared = OAuth2Service()
-    private init() {
-    }
+    private init() { }
     private let urlSession = URLSession.shared
     
     func fetchOAuthToken(
         _ code: String,
         completion: @escaping (Result<String, Error>) -> Void
     ) {
-        let request = authTokenRequest(code: code)
+        guard let request = authTokenRequest(code: code) else {
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
         let task = object(for: request) { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -41,9 +43,11 @@ extension OAuth2Service {
         }
     }
     
-    private func authTokenRequest(code: String) -> URLRequest {
-        let path = "/oauth/token"
-        let queryItems = [
+    private func authTokenRequest(code: String) -> URLRequest? {
+        guard var urlComponents = URLComponents(string: "https://unsplash.com/oauth/token") else {
+            return nil
+        }
+        urlComponents.queryItems = [
             URLQueryItem(name: "client_id", value: Constants.accessKey),
             URLQueryItem(name: "client_secret", value: Constants.secretKey),
             URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
@@ -51,14 +55,15 @@ extension OAuth2Service {
             URLQueryItem(name: "grant_type", value: "authorization_code")
         ]
         
-        var urlComponents = URLComponents(string: path)!
-        urlComponents.queryItems = queryItems
+        guard let url = urlComponents.url else {
+            return nil
+        }
         
-        var request = URLRequest(url: urlComponents.url(relativeTo: Constants.defaultBaseURL)!)
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         return request
     }
-    
+
     private struct OAuthTokenResponseBody: Decodable {
         let accessToken: String
         let tokenType: String

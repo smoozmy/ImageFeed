@@ -1,9 +1,10 @@
-import UIKit
+import Foundation
 
-enum NetworkError: Error { 
+enum NetworkError: Error {
     case httpStatusCode(Int)
     case urlRequestError(Error)
     case urlSessionError
+    case invalidRequest
 }
 
 extension URLSession {

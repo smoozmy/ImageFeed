@@ -16,8 +16,6 @@ final class WebViewViewController: UIViewController {
     
     weak var delegate: WebViewViewControllerDelegate?
     
-    // MARK: - UI and Life Cycle
-    
     private lazy var webView: WKWebView = {
         let element = WKWebView()
         element.navigationDelegate = self
@@ -34,7 +32,6 @@ final class WebViewViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .white
         setView()
         setupConstraints()

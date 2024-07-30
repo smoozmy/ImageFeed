@@ -6,14 +6,11 @@ protocol AuthViewControllerDelegate: AnyObject {
 
 final class AuthViewController: UIViewController {
     
-    private let showWebViewSegueIdentifier = "ShowWebView"
-    
     weak var delegate: AuthViewControllerDelegate?
     
     private lazy var logoUnsplash: UIImageView = {
         let element = UIImageView()
         element.image = UIImage(named: "LogoUnsplash")
-        
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -27,17 +24,15 @@ final class AuthViewController: UIViewController {
         element.layer.cornerRadius = 16
         element.layer.masksToBounds = true
         element.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
-        
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
     
-    // MARK: - UI and Lyfe Cycle
+    // MARK: - UI and Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
-        
         setView()
         setupConstraints()
         configureBackButton()
@@ -67,6 +62,7 @@ final class AuthViewController: UIViewController {
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         delegate?.authViewController(self, didAuthenticateWithCode: code)
+        navigationController?.popViewController(animated: true)
     }
     
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
