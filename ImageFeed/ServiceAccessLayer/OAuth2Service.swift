@@ -11,6 +11,7 @@ final class OAuth2Service {
         completion: @escaping (Result<String, Error>) -> Void
     ) {
         guard let request = authTokenRequest(code: code) else {
+            print("Unable to construct OAuth token request")
             completion(.failure(NetworkError.invalidRequest))
             return
         }
@@ -22,6 +23,7 @@ final class OAuth2Service {
                 OAuth2TokenStorage.shared.token = authToken
                 completion(.success(authToken))
             case .failure(let error):
+                print("Failed data decoding")
                 completion(.failure(error))
             }
         }
