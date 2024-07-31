@@ -78,19 +78,19 @@
 		6F11DCAC2C091AD100790B3B /* ImageFeed */ = {
 			isa = PBXGroup;
 			children = (
-				6F8EEB8E2C35F7070073BC3F /* ServiceAccessLayer */,
-				6F8EEB5A2C2E9D0D0073BC3F /* Auth */,
-				6F8EEAAE2C1DD1240073BC3F /* Helpers */,
-				6F11DCC12C091B0C00790B3B /* Resources */,
 				6F11DCAD2C091AD100790B3B /* AppDelegate.swift */,
 				6F11DCAF2C091AD100790B3B /* SceneDelegate.swift */,
-				6F11DCC52C1799EC00790B3B /* ProfileViewController.swift */,
+				6F8EEAAE2C1DD1240073BC3F /* Helpers */,
+				6F11DCC12C091B0C00790B3B /* Resources */,
+				6F8EEB8E2C35F7070073BC3F /* ServiceAccessLayer */,
+				6F8EEB5A2C2E9D0D0073BC3F /* Auth */,
 				6F11DCCB2C17AA2400790B3B /* ImagesList */,
-				6F11DCB82C091AD100790B3B /* LaunchScreen.storyboard */,
-				6F11DCBB2C091AD100790B3B /* Info.plist */,
+				6F11DCC52C1799EC00790B3B /* ProfileViewController.swift */,
 				6F8EEAB12C1DDECA0073BC3F /* TabBarController.swift */,
 				6F8EEAB32C1E5A6C0073BC3F /* SingleImageViewController.swift */,
 				6F8EEB8C2C35F6E50073BC3F /* SplashViewController.swift */,
+				6F11DCB82C091AD100790B3B /* LaunchScreen.storyboard */,
+				6F11DCBB2C091AD100790B3B /* Info.plist */,
 			);
 			path = ImageFeed;
 			sourceTree = "<group>";

@@ -40,7 +40,12 @@ final class WebViewViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
+        webView.addObserver(
+            self,
+            forKeyPath: #keyPath(WKWebView.estimatedProgress),
+            options: .new,
+            context: nil)
+        updateProgress()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -55,7 +60,6 @@ final class WebViewViewController: UIViewController {
     
     private func loadAuthView() {
         guard var urlComponents = URLComponents(string: WebConstants.unsplashAuthorizeURLString) else {
-            print("Failed to create URLComponents")
             return
         }
         
@@ -67,7 +71,6 @@ final class WebViewViewController: UIViewController {
         ]
         
         guard let url = urlComponents.url else {
-            print("Failed to create URL from URLComponents")
             return
         }
         

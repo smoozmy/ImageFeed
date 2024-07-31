@@ -34,10 +34,8 @@ final class SplashViewController: UIViewController {
         let authViewController = AuthViewController()
         authViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: authViewController)
-        if let window = UIApplication.shared.windows.first {
-            window.rootViewController = navigationController
-            window.makeKeyAndVisible()
-        }
+        navigationController.modalPresentationStyle = .fullScreen
+        self.show(navigationController, sender: nil)
     }
 }
 
@@ -53,7 +51,6 @@ extension SplashViewController: AuthViewControllerDelegate {
             case .success:
                 self.switchToTabBarController()
             case .failure:
-                // Handle error
                 break
             }
         }
