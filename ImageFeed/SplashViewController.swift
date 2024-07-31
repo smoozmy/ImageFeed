@@ -1,4 +1,5 @@
 import UIKit
+import ProgressHUD
 
 final class SplashViewController: UIViewController {
     private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
@@ -45,14 +46,18 @@ extension SplashViewController: AuthViewControllerDelegate {
     }
     
     private func fetchOAuthToken(_ code: String) {
+        ProgressHUD.animate()
+        
         OAuth2Service.shared.fetchOAuthToken(code) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success:
                 self.switchToTabBarController()
             case .failure:
+
                 break
             }
+            ProgressHUD.dismiss()
         }
     }
 }
