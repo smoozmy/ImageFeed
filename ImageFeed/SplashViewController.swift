@@ -2,13 +2,14 @@ import UIKit
 import ProgressHUD
 
 final class SplashViewController: UIViewController {
-    private let showAuthenticationScreenSegueIdentifier = "ShowAuthenticationScreen"
+    private let profileService = ProfileService.shared
+    private let storage = OAuth2TokenStorage.shared
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let authToken = OAuth2TokenStorage.shared.token {
-            switchToTabBarController()
+        if let authToken = storage.token {
+            fetchProfile(token: authToken)
         } else {
             showAuthViewController()
         }
@@ -38,11 +39,21 @@ final class SplashViewController: UIViewController {
         navigationController.modalPresentationStyle = .fullScreen
         self.show(navigationController, sender: nil)
     }
-}
-
-extension SplashViewController: AuthViewControllerDelegate {
-    func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
-        fetchOAuthToken(code)
+    
+    private func fetchProfile(token: String) {
+        UIBlockingProgressHUD.show()
+        profileService.fetchProfile(token) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            
+            guard let self = self else { return }
+            
+            switch result {
+            case .success:
+                self.switchToTabBarController()
+            case .failure(let error):
+                self.showErrorAlert(message: "Не удалось получить информацию профиля: \(error.localizedDescription)")
+            }
+        }
     }
     
     private func fetchOAuthToken(_ code: String) {
@@ -51,13 +62,24 @@ extension SplashViewController: AuthViewControllerDelegate {
         OAuth2Service.shared.fetchOAuthToken(code) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success:
-                self.switchToTabBarController()
-            case .failure:
-
-                break
+            case .success(let token):
+                self.fetchProfile(token: token)
+            case .failure(let error):
+                self.showErrorAlert(message: "Ошибка получения токена: \(error.localizedDescription)")
             }
             UIBlockingProgressHUD.dismiss()
         }
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Ошибка :(", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ок", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+extension SplashViewController: AuthViewControllerDelegate {
+    func authViewController(_ vc: AuthViewController, didAuthenticateWithCode code: String) {
+        fetchOAuthToken(code)
     }
 }
