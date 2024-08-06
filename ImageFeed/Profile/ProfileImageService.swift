@@ -8,20 +8,6 @@ final class ProfileImageService {
     private var task: URLSessionTask?
     private(set) var avatarURL: String?
     
-    struct UserResult: Codable {
-        let profileImage: ProfileImage
-        
-        enum CodingKeys: String, CodingKey {
-            case profileImage = "profile_image"
-        }
-        
-        struct ProfileImage: Codable {
-            let small: String
-            let medium: String
-            let large: String
-        }
-    }
-    
     func fetchProfileImageURL(username: String, completion: @escaping (Result<String, Error>) -> Void) {
         if task != nil {
             task?.cancel()
