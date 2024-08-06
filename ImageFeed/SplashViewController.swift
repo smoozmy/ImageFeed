@@ -46,7 +46,7 @@ extension SplashViewController: AuthViewControllerDelegate {
     }
     
     private func fetchOAuthToken(_ code: String) {
-        ProgressHUD.animate()
+        UIBlockingProgressHUD.show()
         
         OAuth2Service.shared.fetchOAuthToken(code) { [weak self] result in
             guard let self = self else { return }
@@ -57,7 +57,7 @@ extension SplashViewController: AuthViewControllerDelegate {
 
                 break
             }
-            ProgressHUD.dismiss()
+            UIBlockingProgressHUD.dismiss()
         }
     }
 }
