@@ -30,18 +30,15 @@ final class ProfileImageService {
             return
         }
         
-        task = urlSession.data(for: request) { [weak self] result in
+        task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
             guard let self = self else { return }
             switch result {
-            case .success(let data):
-                do {
-                    let userResult = try JSONDecoder().decode(UserResult.self, from: data)
-                    self.avatarURL = userResult.profileImage.small
-                    completion(.success(userResult.profileImage.small))
-                } catch {
-                    completion(.failure(error))
-                }
+            case .success(let userResult):
+                let profileImageURL = userResult.profileImage.small
+                self.avatarURL = profileImageURL
+                completion(.success(profileImageURL))
             case .failure(let error):
+                print("[fetchProfileImageURL]: NetworkError - \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }

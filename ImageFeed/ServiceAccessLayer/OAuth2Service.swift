@@ -32,29 +32,18 @@ final class OAuth2Service {
             return
         }
         
-        let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             DispatchQueue.main.async {
                 self?.task = nil
                 self?.lastCode = nil
                 
-                if let error = error {
-                    completion(.failure(NetworkError.urlRequestError(error)))
-                    return
-                }
-                
-                guard let data = data,
-                      let response = response as? HTTPURLResponse,
-                      response.statusCode == 200 else {
-                    completion(.failure(NetworkError.invalidRequest))
-                    return
-                }
-                
-                do {
-                    let responseBody = try JSONDecoder().decode(OAuthTokenResponseBody.self, from: data)
+                switch result {
+                case .success(let responseBody):
                     let authToken = responseBody.accessToken
                     OAuth2TokenStorage.shared.token = authToken
                     completion(.success(authToken))
-                } catch {
+                case .failure(let error):
+                    print("[fetchOAuthToken]: NetworkError - \(error.localizedDescription)")
                     completion(.failure(NetworkError.invalidRequest))
                 }
             }
@@ -99,4 +88,3 @@ final class OAuth2Service {
         }
     }
 }
-
