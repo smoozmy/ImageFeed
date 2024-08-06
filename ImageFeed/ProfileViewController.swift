@@ -132,6 +132,42 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .ypBlack
         setView()
         setupConstraints()
+        
+        fetchProfile()
+    }
+    
+    private func fetchProfile() {
+        guard let token = OAuth2TokenStorage.shared.token else {
+            print("Токен не найден")
+            return
+        }
+        
+        ProfileService.shared.fetchProfile(token) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let profile):
+                DispatchQueue.main.async {
+                    self.updateUI(with: profile)
+                }
+            case .failure(let error):
+                print("Ошибка получения данных профиля: \(error)")
+            }
+        }
+    }
+    
+    private func updateUI(with profile: ProfileService.Profile) {
+        nameLabel.text = profile.name
+        loginLabel.text = profile.loginName
+        discriptionLabel.text = profile.bio
+        if let profileImageURL = profile.profileImageURL, let url = URL(string: profileImageURL) {
+            DispatchQueue.global().async {
+                if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.userPhoto.image = image
+                    }
+                }
+            }
+        }
     }
     
     private func setView() {
