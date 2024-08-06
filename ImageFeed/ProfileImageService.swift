@@ -17,6 +17,8 @@ final class ProfileImageService {
         
         struct ProfileImage: Codable {
             let small: String
+            let medium: String
+            let large: String
         }
     }
     
@@ -34,11 +36,10 @@ final class ProfileImageService {
             guard let self = self else { return }
             switch result {
             case .success(let userResult):
-                let profileImageURL = userResult.profileImage.small
-                self.avatarURL = profileImageURL
-                completion(.success(profileImageURL))
+                self.avatarURL = userResult.profileImage.large
+                completion(.success(userResult.profileImage.large))
             case .failure(let error):
-                print("[fetchProfileImageURL]: NetworkError - \(error.localizedDescription)")
+                print("[ProfileImageService]: NetworkError - \(error.localizedDescription), username: \(username)")
                 completion(.failure(error))
             }
         }

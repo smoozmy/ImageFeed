@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
@@ -40,13 +41,15 @@ final class ProfileViewController: UIViewController {
     
     private lazy var userPhoto: UIImageView = {
         let element = UIImageView()
-        element.image = UIImage(named: "UserPhoto") ?? UIImage(named: "UserPhotoDefault")
+        element.image = UIImage(named: "UserPhotoDefault")
         element.contentMode = .scaleAspectFill
         element.layer.cornerRadius = 35
         element.clipsToBounds = true
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
+    
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     private lazy var logoutButton: UIButton = {
         let element = UIButton(type: .custom)
@@ -133,6 +136,21 @@ final class ProfileViewController: UIViewController {
         setView()
         setupConstraints()
         updateProfileDetails()
+        updateAvatar()
+    }
+    
+    private func updateAvatar() {
+        guard let avatarURL = ProfileImageService.shared.avatarURL,
+              let url = URL(string: avatarURL) else { return }
+        
+        userPhoto.kf.setImage(with: url, placeholder: UIImage(named: "UserPhotoDefault"))
+    }
+    
+    private func updateProfileDetails() {
+        guard let profile = ProfileService.shared.profile else { return }
+        nameLabel.text = profile.name
+        loginLabel.text = profile.loginName
+        discriptionLabel.text = profile.bio
     }
     
     private func setView() {
@@ -159,15 +177,6 @@ final class ProfileViewController: UIViewController {
     
     @objc private func didTapLogoutButton() {
         
-    }
-    
-    private func updateProfileDetails() {
-        guard let profile = ProfileService.shared.profile else {
-            return
-        }
-        nameLabel.text = profile.name
-        loginLabel.text = profile.loginName
-        discriptionLabel.text = profile.bio
     }
 }
 

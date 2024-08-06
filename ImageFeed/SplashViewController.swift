@@ -8,6 +8,7 @@ final class SplashViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        view.backgroundColor = .ypBlack
         
         if let authToken = storage.token {
             fetchProfile(token: authToken)
@@ -50,8 +51,7 @@ final class SplashViewController: UIViewController {
             
             switch result {
             case .success(let profile):
-                self.profileImageService.fetchProfileImageURL(username: profile.username) { _ in }
-                self.switchToTabBarController()
+                self.fetchProfileImage(username: profile.username)
             case .failure(let error):
                 self.showErrorAlert(message: "Не удалось получить информацию профиля: \(error.localizedDescription)")
             }
@@ -70,6 +70,18 @@ final class SplashViewController: UIViewController {
                 self.showErrorAlert(message: "Ошибка получения токена: \(error.localizedDescription)")
             }
             UIBlockingProgressHUD.dismiss()
+        }
+    }
+    
+    private func fetchProfileImage(username: String) {
+        profileImageService.fetchProfileImageURL(username: username) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let imageURL):
+                self.switchToTabBarController()
+            case .failure(let error):
+                self.showErrorAlert(message: "Не удалось получить URL аватарки: \(error.localizedDescription)")
+            }
         }
     }
     
