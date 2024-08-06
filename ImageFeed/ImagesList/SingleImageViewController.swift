@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 final class SingleImageViewController: UIViewController {
     
@@ -87,10 +88,15 @@ final class SingleImageViewController: UIViewController {
     
     // MARK: - Public Methods
     
-    func setImage(_ image: UIImage) {
-        imageView.image = image
-        view.layoutIfNeeded()
-        rescaleAndCenterImageInScrollView(image: image)
+    func setImage(url: URL) {
+        imageView.kf.setImage(with: url) { [weak self] result in
+            switch result {
+            case .success(let value):
+                self?.rescaleAndCenterImageInScrollView(image: value.image)
+            case .failure(let error):
+                print("Error loading image: \(error)")
+            }
+        }
     }
     
     // MARK: - Constraints

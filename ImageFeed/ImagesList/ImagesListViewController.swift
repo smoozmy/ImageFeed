@@ -1,11 +1,11 @@
 import UIKit
+import Kingfisher
 
 final class ImagesListViewController: UIViewController {
-    
-    private let photosName: [String] = Array(0..<20).map { "\($0)" }
-    
-    // MARK: - UI and Life Cycle
-    
+
+    private let imagesListService = ImagesListService.shared
+    private var photos: [Photo] = []
+
     private lazy var tableView: UITableView = {
         let element = UITableView()
         element.backgroundColor = .ypBlack
@@ -28,44 +28,70 @@ final class ImagesListViewController: UIViewController {
         
         setView()
         setupConstraints()
+        
+        fetchPhotosNextPage()
     }
     
     private func setView() {
         view.addSubview(tableView)
     }
-    
+
+    private func fetchPhotosNextPage() {
+        imagesListService.fetchPhotosNextPage { [weak self] result in
+            switch result {
+            case .success(let newPhotos):
+                self?.photos.append(contentsOf: newPhotos)
+                self?.tableView.reloadData()
+            case .failure(let error):
+                print("Ошибка загрузки изображения: \(error.localizedDescription)")
+            }
+        }
+    }
+
     // MARK: - Actions
     
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
-            return
-        }
-        cell.backgroundColor = .clear
-        cell.imageCell.image = image
+        let photo = photos[indexPath.row]
+        
+        let lowQualityURL = URL(string: photo.thumbImageURL)
+        let highQualityURL = URL(string: photo.smallImageURL)
+        
+        cell.imageCell.kf.setImage(with: lowQualityURL, placeholder: nil, options: nil, completionHandler: { result in
+            switch result {
+            case .success:
+                cell.imageCell.kf.setImage(with: highQualityURL)
+            case .failure(let error):
+                print("Ошибка загрузки изображения: \(error.localizedDescription)")
+            }
+        })
+        
         cell.selectionStyle = .none
         
-        let isLiked = indexPath.row % 2 == 0
+        let isLiked = photo.isLiked
         let likeImage = isLiked ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
         cell.likeButton.setImage(likeImage, for: .normal)
+        
+        if let date = photo.createdAt {
+            cell.dateLabel.text = date.dateTimeString
+        } else {
+            cell.dateLabel.text = ""
+        }
     }
 }
 
 extension ImagesListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
-            return 0
-        }
+        let photo = photos[indexPath.row]
         let imageInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16)
         let imageViewWidth = tableView.bounds.width - imageInsets.left - imageInsets.right
-        let imageWidth = image.size.width
-        let scale = imageViewWidth / imageWidth
-        let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
+        let scale = imageViewWidth / photo.size.width
+        let cellHeight = photo.size.height * scale + imageInsets.top + imageInsets.bottom
         return cellHeight
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        photosName.count
+        photos.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -82,14 +108,20 @@ extension ImagesListViewController: UITableViewDataSource {
 
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
-            return
-        }
+        let photo = photos[indexPath.row]
         
         let singleImageViewController = SingleImageViewController()
-        singleImageViewController.setImage(image)
+        if let url = URL(string: photo.largeImageURL) {
+            singleImageViewController.setImage(url: url)
+        }
         singleImageViewController.modalPresentationStyle = .fullScreen
         present(singleImageViewController, animated: true, completion: nil)
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row + 1 == photos.count {
+            fetchPhotosNextPage()
+        }
     }
 }
 

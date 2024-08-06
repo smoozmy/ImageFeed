@@ -12,7 +12,7 @@ final class ImagesListCell: UITableViewCell {
         return element
     }()
     
-    private lazy var dateLabel: UILabel = {
+    lazy var dateLabel: UILabel = {
         let element = UILabel()
         let date = Date()
         element.text = date.dateTimeString
@@ -40,6 +40,7 @@ final class ImagesListCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        self.backgroundColor = .ypBlack
         self.setView()
         self.setupConstraints()
     }
