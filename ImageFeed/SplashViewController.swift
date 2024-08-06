@@ -3,6 +3,7 @@ import ProgressHUD
 
 final class SplashViewController: UIViewController {
     private let profileService = ProfileService.shared
+    private let profileImageService = ProfileImageService.shared
     private let storage = OAuth2TokenStorage.shared
     
     override func viewDidAppear(_ animated: Bool) {
@@ -48,7 +49,8 @@ final class SplashViewController: UIViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success:
+            case .success(let profile):
+                self.profileImageService.fetchProfileImageURL(username: profile.username) { _ in }
                 self.switchToTabBarController()
             case .failure(let error):
                 self.showErrorAlert(message: "Не удалось получить информацию профиля: \(error.localizedDescription)")
