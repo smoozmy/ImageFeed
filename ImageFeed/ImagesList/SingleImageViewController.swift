@@ -62,6 +62,14 @@ final class SingleImageViewController: UIViewController {
         return element
     }()
     
+    private lazy var stubImageView: UIImageView = {
+        let element = UIImageView()
+        element.image = UIImage(named: "Stub")
+        element.contentMode = .scaleAspectFit
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
@@ -81,6 +89,7 @@ final class SingleImageViewController: UIViewController {
         singleImageButtonsStackView.addArrangedSubview(likeButton)
         singleImageButtonsStackView.addArrangedSubview(sharingButton)
         view.addSubview(backButton)
+        view.addSubview(stubImageView)
     }
     
     @objc private func didTapBackButton() {
@@ -116,12 +125,16 @@ final class SingleImageViewController: UIViewController {
 
     
     func setImage(url: URL) {
+        stubImageView.isHidden = false
         imageView.kf.setImage(with: url) { [weak self] result in
-            switch result {
-            case .success(let value):
-                self?.rescaleAndCenterImageInScrollView(image: value.image)
-            case .failure(let error):
-                print("Ошибка загрузки изображения: \(error)")
+            DispatchQueue.main.async {
+                self?.stubImageView.isHidden = true
+                switch result {
+                case .success(let value):
+                    self?.rescaleAndCenterImageInScrollView(image: value.image)
+                case .failure(let error):
+                    print("Ошибка загрузки полноразмерного изображения: \(error)")
+                }
             }
         }
     }
@@ -157,7 +170,12 @@ final class SingleImageViewController: UIViewController {
             singleImageButtonsStackView.heightAnchor.constraint(equalToConstant: 51),
             singleImageButtonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 68),
             singleImageButtonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -68),
-            singleImageButtonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            singleImageButtonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            
+            stubImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stubImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stubImageView.widthAnchor.constraint(equalToConstant: 83),
+            stubImageView.heightAnchor.constraint(equalToConstant: 75)
         ])
     }
     
