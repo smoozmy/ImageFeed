@@ -2,10 +2,10 @@ import UIKit
 import Kingfisher
 
 final class ImagesListViewController: UIViewController {
-
+    
     private let imagesListService = ImagesListService.shared
     private var photos: [Photo] = []
-
+    
     private lazy var tableView: UITableView = {
         let element = UITableView()
         element.backgroundColor = .ypBlack
@@ -54,7 +54,7 @@ final class ImagesListViewController: UIViewController {
     private func setView() {
         view.addSubview(tableView)
     }
-
+    
     private func fetchPhotosNextPage() {
         imagesListService.fetchPhotosNextPage { [weak self] result in
             switch result {
@@ -65,7 +65,7 @@ final class ImagesListViewController: UIViewController {
             }
         }
     }
-
+    
     // MARK: - Actions
     
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
@@ -108,7 +108,7 @@ final class ImagesListViewController: UIViewController {
             cell.dateLabel.text = ""
         }
     }
-
+    
 }
 
 extension ImagesListViewController: UITableViewDataSource {
@@ -145,13 +145,14 @@ extension ImagesListViewController: UITableViewDelegate {
         
         let singleImageViewController = SingleImageViewController()
         singleImageViewController.photo = photo
+        singleImageViewController.delegate = self
         if let url = URL(string: photo.largeImageURL) {
             singleImageViewController.setImage(url: url)
         }
         singleImageViewController.modalPresentationStyle = .fullScreen
         present(singleImageViewController, animated: true, completion: nil)
     }
-
+    
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row + 1 == photos.count {
             fetchPhotosNextPage()
@@ -179,6 +180,20 @@ extension ImagesListViewController: ImagesListCellDelegate {
         }
     }
 }
+
+extension ImagesListViewController: SingleImageViewControllerDelegate {
+    func singleImageViewController(_ controller: SingleImageViewController, didUpdatePhoto updatedPhoto: Photo) {
+        if let index = photos.firstIndex(where: { $0.id == updatedPhoto.id }) {
+            photos[index] = updatedPhoto
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = tableView.cellForRow(at: indexPath) as? ImagesListCell {
+                cell.setIsLiked(updatedPhoto.isLiked)
+            }
+        }
+    }
+}
+
+
 
 
 // MARK: - Constraints

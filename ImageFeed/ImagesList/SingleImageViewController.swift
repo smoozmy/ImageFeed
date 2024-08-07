@@ -1,9 +1,15 @@
 import UIKit
 import Kingfisher
 
+protocol SingleImageViewControllerDelegate: AnyObject {
+    func singleImageViewController(_ controller: SingleImageViewController, didUpdatePhoto photo: Photo)
+}
+
 final class SingleImageViewController: UIViewController {
     
+    weak var delegate: SingleImageViewControllerDelegate?
     var photo: Photo?
+    private let imagesListService = ImagesListService.shared
 
     // MARK: - UI and Life Cycle
     
@@ -91,19 +97,23 @@ final class SingleImageViewController: UIViewController {
         guard let photo = photo else { return }
         
         UIBlockingProgressHUD.show()
-        ImagesListService.shared.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             DispatchQueue.main.async {
                 UIBlockingProgressHUD.dismiss()
                 switch result {
                 case .success:
                     self?.photo?.isLiked.toggle()
-                    self?.updateLikeButton(for: self?.photo?.isLiked ?? false)
+                    if let updatedPhoto = self?.photo {
+                        self?.delegate?.singleImageViewController(self!, didUpdatePhoto: updatedPhoto)
+                        self?.updateLikeButton(for: updatedPhoto.isLiked)
+                    }
                 case .failure(let error):
                     print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
                 }
             }
         }
     }
+
     
     func setImage(url: URL) {
         imageView.kf.setImage(with: url) { [weak self] result in
