@@ -108,8 +108,9 @@ final class ImagesListViewController: UIViewController {
         } else {
             cell.dateLabel.text = ""
         }
+        
+        cell.delegate = self
     }
-
 }
 
 extension ImagesListViewController: UITableViewDataSource {
@@ -154,6 +155,27 @@ extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row + 1 == photos.count {
             fetchPhotosNextPage()
+        }
+    }
+}
+
+// MARK: - ImagesListCellDelegate
+
+extension ImagesListViewController: ImagesListCellDelegate {
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let photo = photos[indexPath.row]
+        
+        UIBlockingProgressHUD.show()
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            switch result {
+            case .success:
+                self?.photos = self?.imagesListService.photos ?? []
+                cell.setIsLiked(self?.photos[indexPath.row].isLiked ?? false)
+            case .failure(let error):
+                print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
+            }
         }
     }
 }

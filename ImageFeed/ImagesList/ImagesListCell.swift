@@ -1,9 +1,15 @@
 import UIKit
 
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellDidTapLike(_ cell: ImagesListCell)
+}
+
 final class ImagesListCell: UITableViewCell {
     static let reuseIdentifier = "ImagesListCell"
     
-    // MARK: - UI and Lyfe Cycle
+    weak var delegate: ImagesListCellDelegate?
+
+    // MARK: - UI and Life Cycle
     
     lazy var rectangle: UIImageView = {
         let element = UIImageView()
@@ -44,6 +50,7 @@ final class ImagesListCell: UITableViewCell {
     lazy var likeButton: UIButton = {
         let element = UIButton(type: .custom)
         element.translatesAutoresizingMaskIntoConstraints = false
+        element.addTarget(self, action: #selector(likeButtonClicked), for: .touchUpInside)
         return element
     }()
     
@@ -72,6 +79,15 @@ final class ImagesListCell: UITableViewCell {
         stubImageView.isHidden = false
     }
     
+    @objc private func likeButtonClicked() {
+        delegate?.imageListCellDidTapLike(self)
+    }
+
+    func setIsLiked(_ isLiked: Bool) {
+        let likeImage = isLiked ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
+        likeButton.setImage(likeImage, for: .normal)
+    }
+
     // MARK: - Constraints
 
     private func setupConstraints() {

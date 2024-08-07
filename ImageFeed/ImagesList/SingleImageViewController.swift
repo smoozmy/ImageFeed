@@ -3,6 +3,8 @@ import Kingfisher
 
 final class SingleImageViewController: UIViewController {
     
+    var photo: Photo?
+
     // MARK: - UI and Life Cycle
     
     private lazy var scrollView: UIScrollView = {
@@ -34,7 +36,6 @@ final class SingleImageViewController: UIViewController {
         element.setImage(UIImage(named: "LikeСircleNoActive"), for: .normal)
         element.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
-        element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
     
@@ -61,6 +62,8 @@ final class SingleImageViewController: UIViewController {
         
         setView()
         setupConstraints()
+        
+        updateLikeButtonState()
     }
     
     private func setView() {
@@ -83,7 +86,26 @@ final class SingleImageViewController: UIViewController {
     }
     
     @objc private func didTapLikeButton() {
+        guard let photo = photo else { return }
         
+        UIBlockingProgressHUD.show()
+        ImagesListService.shared.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            UIBlockingProgressHUD.dismiss()
+            switch result {
+            case .success:
+                self?.photo = ImagesListService.shared.photos.first { $0.id == photo.id }
+                self?.updateLikeButtonState()
+            case .failure(let error):
+                print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func updateLikeButtonState() {
+        guard let photo = photo else { return }
+        let isLiked = photo.isLiked
+        let likeImage = isLiked ? UIImage(named: "LikeCircleActive") : UIImage(named: "LikeCircleNoActive")
+        likeButton.setImage(likeImage, for: .normal)
     }
     
     // MARK: - Public Methods

@@ -17,7 +17,7 @@ final class ImagesListService {
         isFetchingPhotos = true
 
         let nextPage = (lastLoadedPage ?? 0) + 1
-        var urlComponents = URLComponents(string: "https://api.unsplash.com/photos")
+        var urlComponents = URLComponents(string: "\(Constants.defaultBaseURL)photos")
         urlComponents?.queryItems = [
             URLQueryItem(name: "page", value: "\(nextPage)"),
             URLQueryItem(name: "per_page", value: "\(perPage)")
@@ -48,6 +48,48 @@ final class ImagesListService {
                 completion(.failure(error))
             }
             self.isFetchingPhotos = false
+        }
+        task.resume()
+    }
+    
+    func changeLike(photoId: String, isLike: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let index = photos.firstIndex(where: { $0.id == photoId }) else {
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+        
+        let method = isLike ? "POST" : "DELETE"
+        var request = URLRequest(url: URL(string: "\(Constants.defaultBaseURL)photos/\(photoId)/like")!)
+        request.httpMethod = method
+        if let token = OAuth2TokenStorage.shared.token {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data,
+                  let response = response as? HTTPURLResponse,
+                  response.statusCode == 200 || response.statusCode == 201 else {
+                completion(.failure(NetworkError.invalidResponse))
+                return
+            }
+            
+            do {
+                let photoResult = try JSONDecoder().decode(PhotoResult.self, from: data)
+                let updatedPhoto = Photo(from: photoResult)
+                
+                self.photos[index] = updatedPhoto
+                NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self)
+                completion(.success(()))
+            } catch {
+                completion(.failure(error))
+            }
         }
         task.resume()
     }
