@@ -30,6 +30,25 @@ final class ImagesListViewController: UIViewController {
         setupConstraints()
         
         fetchPhotosNextPage()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(didChangePhotos),
+            name: ImagesListService.didChangeNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func didChangePhotos(_ notification: Notification) {
+        guard let newPhotos = notification.userInfo?["newPhotos"] as? [Photo] else { return }
+        let startIndex = photos.count
+        photos.append(contentsOf: newPhotos)
+        let endIndex = photos.count
+        let indexPaths = (startIndex..<endIndex).map { IndexPath(row: $0, section: 0) }
+        
+        tableView.performBatchUpdates({
+            tableView.insertRows(at: indexPaths, with: .automatic)
+        }, completion: nil)
     }
     
     private func setView() {
@@ -40,8 +59,7 @@ final class ImagesListViewController: UIViewController {
         imagesListService.fetchPhotosNextPage { [weak self] result in
             switch result {
             case .success(let newPhotos):
-                self?.photos.append(contentsOf: newPhotos)
-                self?.tableView.reloadData()
+                print("Успешно загружено \(newPhotos.count) новых изображений")
             case .failure(let error):
                 print("Ошибка загрузки изображения: \(error.localizedDescription)")
             }
@@ -56,10 +74,24 @@ final class ImagesListViewController: UIViewController {
         let lowQualityURL = URL(string: photo.thumbImageURL)
         let highQualityURL = URL(string: photo.smallImageURL)
         
+        cell.rectangle.isHidden = true
+        cell.likeButton.isHidden = true
+        cell.dateLabel.isHidden = true
+        
         cell.imageCell.kf.setImage(with: lowQualityURL, placeholder: nil, options: nil, completionHandler: { result in
             switch result {
             case .success:
-                cell.imageCell.kf.setImage(with: highQualityURL)
+                cell.imageCell.kf.setImage(with: highQualityURL) { result in
+                    switch result {
+                    case .success:
+                        cell.rectangle.isHidden = false
+                        cell.likeButton.isHidden = false
+                        cell.dateLabel.isHidden = false
+                        cell.stubImageView.isHidden = true
+                    case .failure(let error):
+                        print("Ошибка загрузки изображения: \(error.localizedDescription)")
+                    }
+                }
             case .failure(let error):
                 print("Ошибка загрузки изображения: \(error.localizedDescription)")
             }
@@ -77,6 +109,7 @@ final class ImagesListViewController: UIViewController {
             cell.dateLabel.text = ""
         }
     }
+
 }
 
 extension ImagesListViewController: UITableViewDataSource {

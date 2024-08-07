@@ -5,7 +5,7 @@ final class ImagesListCell: UITableViewCell {
     
     // MARK: - UI and Lyfe Cycle
     
-    private lazy var rectangle: UIImageView = {
+    lazy var rectangle: UIImageView = {
         let element = UIImageView()
         element.image = UIImage(named: "Rectangle")
         element.translatesAutoresizingMaskIntoConstraints = false
@@ -26,8 +26,17 @@ final class ImagesListCell: UITableViewCell {
     lazy var imageCell: UIImageView = {
         let element = UIImageView()
         element.layer.cornerRadius = 16
+        element.backgroundColor = .ypWhiteAlpha50
         element.layer.masksToBounds = true
         element.contentMode = .scaleAspectFill
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
+    lazy var stubImageView: UIImageView = {
+        let element = UIImageView()
+        element.image = UIImage(named: "Stub")
+        element.contentMode = .scaleAspectFit
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -54,15 +63,17 @@ final class ImagesListCell: UITableViewCell {
         imageCell.addSubview(rectangle)
         imageCell.addSubview(likeButton)
         imageCell.addSubview(dateLabel)
+        imageCell.addSubview(stubImageView)
     }
     
-    // MARK: - Actions
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        imageCell.kf.cancelDownloadTask()
+        stubImageView.isHidden = false
+    }
     
-}
+    // MARK: - Constraints
 
-// MARK: - Constraints
-
-extension ImagesListCell {
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             imageCell.topAnchor.constraint(equalTo: topAnchor, constant: 4),
@@ -79,7 +90,11 @@ extension ImagesListCell {
             
             likeButton.trailingAnchor.constraint(equalTo: imageCell.trailingAnchor),
             likeButton.topAnchor.constraint(equalTo: imageCell.topAnchor),
+            
+            stubImageView.centerXAnchor.constraint(equalTo: imageCell.centerXAnchor),
+            stubImageView.centerYAnchor.constraint(equalTo: imageCell.centerYAnchor),
+            stubImageView.widthAnchor.constraint(equalToConstant: 83),
+            stubImageView.heightAnchor.constraint(equalToConstant: 75)
         ])
     }
 }
-

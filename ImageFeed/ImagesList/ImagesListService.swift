@@ -2,6 +2,7 @@ import Foundation
 
 final class ImagesListService {
     static let shared = ImagesListService()
+    static let didChangeNotification = Notification.Name("ImagesListServiceDidChange")
     private init() { }
     
     private let urlSession = URLSession.shared
@@ -41,6 +42,7 @@ final class ImagesListService {
                 let newPhotos = photoResults.map { Photo(from: $0) }
                 self.photos.append(contentsOf: newPhotos)
                 self.lastLoadedPage = nextPage
+                NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self, userInfo: ["newPhotos": newPhotos])
                 completion(.success(newPhotos))
             case .failure(let error):
                 completion(.failure(error))
