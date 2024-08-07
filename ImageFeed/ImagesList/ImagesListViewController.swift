@@ -100,17 +100,15 @@ final class ImagesListViewController: UIViewController {
         cell.selectionStyle = .none
         
         let isLiked = photo.isLiked
-        let likeImage = isLiked ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
-        cell.likeButton.setImage(likeImage, for: .normal)
+        cell.setIsLiked(isLiked)
         
         if let date = photo.createdAt {
             cell.dateLabel.text = date.dateTimeString
         } else {
             cell.dateLabel.text = ""
         }
-        
-        cell.delegate = self
     }
+
 }
 
 extension ImagesListViewController: UITableViewDataSource {
@@ -136,6 +134,7 @@ extension ImagesListViewController: UITableViewDataSource {
         }
         
         configCell(for: imageListCell, with: indexPath)
+        imageListCell.delegate = self
         return imageListCell
     }
 }
@@ -145,6 +144,7 @@ extension ImagesListViewController: UITableViewDelegate {
         let photo = photos[indexPath.row]
         
         let singleImageViewController = SingleImageViewController()
+        singleImageViewController.photo = photo
         if let url = URL(string: photo.largeImageURL) {
             singleImageViewController.setImage(url: url)
         }
@@ -159,8 +159,6 @@ extension ImagesListViewController: UITableViewDelegate {
     }
 }
 
-// MARK: - ImagesListCellDelegate
-
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
@@ -168,17 +166,20 @@ extension ImagesListViewController: ImagesListCellDelegate {
         
         UIBlockingProgressHUD.show()
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
-            UIBlockingProgressHUD.dismiss()
-            switch result {
-            case .success:
-                self?.photos = self?.imagesListService.photos ?? []
-                cell.setIsLiked(self?.photos[indexPath.row].isLiked ?? false)
-            case .failure(let error):
-                print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+                switch result {
+                case .success:
+                    self?.photos[indexPath.row].isLiked.toggle()
+                    cell.setIsLiked(self?.photos[indexPath.row].isLiked ?? false)
+                case .failure(let error):
+                    print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
+                }
             }
         }
     }
 }
+
 
 // MARK: - Constraints
 

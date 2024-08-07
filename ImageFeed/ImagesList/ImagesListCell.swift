@@ -82,12 +82,12 @@ final class ImagesListCell: UITableViewCell {
     @objc private func likeButtonClicked() {
         delegate?.imageListCellDidTapLike(self)
     }
-
+    
     func setIsLiked(_ isLiked: Bool) {
         let likeImage = isLiked ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
         likeButton.setImage(likeImage, for: .normal)
     }
-
+    
     // MARK: - Constraints
 
     private func setupConstraints() {

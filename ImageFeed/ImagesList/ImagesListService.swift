@@ -17,7 +17,7 @@ final class ImagesListService {
         isFetchingPhotos = true
 
         let nextPage = (lastLoadedPage ?? 0) + 1
-        var urlComponents = URLComponents(string: "\(Constants.defaultBaseURL)photos")
+        var urlComponents = URLComponents(string: "https://api.unsplash.com/photos")
         urlComponents?.queryItems = [
             URLQueryItem(name: "page", value: "\(nextPage)"),
             URLQueryItem(name: "per_page", value: "\(perPage)")
@@ -37,58 +37,52 @@ final class ImagesListService {
 
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<[PhotoResult], Error>) in
             guard let self = self else { return }
-            switch result {
-            case .success(let photoResults):
-                let newPhotos = photoResults.map { Photo(from: $0) }
-                self.photos.append(contentsOf: newPhotos)
-                self.lastLoadedPage = nextPage
-                NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self, userInfo: ["newPhotos": newPhotos])
-                completion(.success(newPhotos))
-            case .failure(let error):
-                completion(.failure(error))
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let photoResults):
+                    let newPhotos = photoResults.map { Photo(from: $0) }
+                    self.photos.append(contentsOf: newPhotos)
+                    self.lastLoadedPage = nextPage
+                    NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self, userInfo: ["newPhotos": newPhotos])
+                    completion(.success(newPhotos))
+                case .failure(let error):
+                    completion(.failure(error))
+                }
+                self.isFetchingPhotos = false
             }
-            self.isFetchingPhotos = false
         }
         task.resume()
     }
     
     func changeLike(photoId: String, isLike: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
-        guard let index = photos.firstIndex(where: { $0.id == photoId }) else {
+        let method = isLike ? "POST" : "DELETE"
+        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
             completion(.failure(NetworkError.invalidRequest))
             return
         }
         
-        let method = isLike ? "POST" : "DELETE"
-        var request = URLRequest(url: URL(string: "\(Constants.defaultBaseURL)photos/\(photoId)/like")!)
+        var request = URLRequest(url: url)
         request.httpMethod = method
         if let token = OAuth2TokenStorage.shared.token {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        
+
         let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
-            
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data,
-                  let response = response as? HTTPURLResponse,
-                  response.statusCode == 200 || response.statusCode == 201 else {
-                completion(.failure(NetworkError.invalidResponse))
-                return
-            }
-            
-            do {
-                let photoResult = try JSONDecoder().decode(PhotoResult.self, from: data)
-                let updatedPhoto = Photo(from: photoResult)
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                    var photo = self.photos[index]
+                    photo.isLiked = isLike
+                    self.photos[index] = photo
+                    NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self, userInfo: ["photo": photo])
+                }
                 
-                self.photos[index] = updatedPhoto
-                NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: self)
                 completion(.success(()))
-            } catch {
-                completion(.failure(error))
             }
         }
         task.resume()
