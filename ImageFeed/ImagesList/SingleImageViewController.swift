@@ -134,7 +134,7 @@ final class SingleImageViewController: UIViewController {
         
         let options: KingfisherOptionsInfo = [
             .transition(.fade(0.3)),
-            .cacheOriginalImage
+            .forceRefresh
         ]
         imageView.kf.setImage(with: url, placeholder: nil, options: options) { [weak self] result in
             DispatchQueue.main.async {
