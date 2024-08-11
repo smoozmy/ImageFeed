@@ -79,6 +79,9 @@ final class SingleImageViewController: UIViewController {
         
         if let photo = photo {
             updateLikeButton(for: photo.isLiked)
+            if let url = URL(string: photo.largeImageURL) {
+                setImage(url: url)
+            }
         }
     }
     
@@ -123,10 +126,17 @@ final class SingleImageViewController: UIViewController {
         }
     }
 
-    
     func setImage(url: URL) {
         stubImageView.isHidden = false
-        imageView.kf.setImage(with: url) { [weak self] result in
+        imageView.image = nil
+        scrollView.zoomScale = 1.0
+        scrollView.contentSize = .zero
+        
+        let options: KingfisherOptionsInfo = [
+            .transition(.fade(0.3)),
+            .cacheOriginalImage
+        ]
+        imageView.kf.setImage(with: url, placeholder: nil, options: options) { [weak self] result in
             DispatchQueue.main.async {
                 self?.stubImageView.isHidden = true
                 switch result {
