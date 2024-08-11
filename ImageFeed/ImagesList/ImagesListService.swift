@@ -87,4 +87,8 @@ final class ImagesListService {
         }
         task.resume()
     }
+    
+    func clearImages() {
+            photos.removeAll()
+        }
 }
