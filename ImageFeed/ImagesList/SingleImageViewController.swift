@@ -39,7 +39,7 @@ final class SingleImageViewController: UIViewController {
     
     private lazy var likeButton: UIButton = {
         let element = UIButton()
-        element.setImage(UIImage(named: "LikeNoActive"), for: .normal)
+        element.setImage(UIImage(named: "LikeСircleNoActive"), for: .normal)
         element.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
@@ -150,7 +150,7 @@ final class SingleImageViewController: UIViewController {
     }
     
     private func updateLikeButton(for isLiked: Bool) {
-        let likeImage = isLiked ? UIImage(named: "LikeActive") : UIImage(named: "LikeNoActive")
+        let likeImage = isLiked ? UIImage(named: "LikeСircleActive") : UIImage(named: "LikeСircleNoActive")
         likeButton.setImage(likeImage, for: .normal)
     }
     
