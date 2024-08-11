@@ -3,6 +3,8 @@ import Kingfisher
 
 final class ProfileViewController: UIViewController {
     
+    private var animationLayers = Set<CALayer>()
+    
     // MARK: - UI and Lyfe Cycle
     
     private lazy var mainStackView: UIStackView = {
@@ -135,6 +137,7 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .ypBlack
         setView()
         setupConstraints()
+        startLoadingAnimation()
         updateProfileDetails()
         updateAvatar()
     }
@@ -143,7 +146,9 @@ final class ProfileViewController: UIViewController {
         guard let avatarURL = ProfileImageService.shared.avatarURL,
               let url = URL(string: avatarURL) else { return }
         
-        userPhoto.kf.setImage(with: url, placeholder: UIImage(named: "UserPhotoDefault"))
+        userPhoto.kf.setImage(with: url, placeholder: UIImage(named: "UserPhotoDefault")) { [weak self] _ in
+            self?.stopLoadingAnimation()
+        }
     }
     
     private func updateProfileDetails() {
@@ -151,6 +156,42 @@ final class ProfileViewController: UIViewController {
         nameLabel.text = profile.name
         loginLabel.text = profile.loginName
         discriptionLabel.text = profile.bio
+        stopLoadingAnimation()
+    }
+    
+    private func startLoadingAnimation() {
+        addGradientLayer(to: userPhoto, cornerRadius: 35)
+        addGradientLayer(to: nameLabel)
+        addGradientLayer(to: loginLabel)
+        addGradientLayer(to: discriptionLabel)
+    }
+    
+    private func stopLoadingAnimation() {
+        animationLayers.forEach { $0.removeFromSuperlayer() }
+        animationLayers.removeAll()
+    }
+    
+    private func addGradientLayer(to view: UIView, cornerRadius: CGFloat = 0) {
+        let gradient = CAGradientLayer()
+        gradient.frame = view.bounds
+        gradient.colors = [
+            UIColor(red: 0.682, green: 0.686, blue: 0.706, alpha: 1).cgColor,
+            UIColor(red: 0.531, green: 0.533, blue: 0.553, alpha: 1).cgColor,
+            UIColor(red: 0.431, green: 0.433, blue: 0.453, alpha: 1).cgColor
+        ]
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.cornerRadius = cornerRadius
+        
+        let gradientAnimation = CABasicAnimation(keyPath: "locations")
+        gradientAnimation.fromValue = [0, 0.1, 0.3]
+        gradientAnimation.toValue = [0, 0.8, 1]
+        gradientAnimation.duration = 1.0
+        gradientAnimation.repeatCount = .infinity
+        
+        gradient.add(gradientAnimation, forKey: "locationsChange")
+        view.layer.addSublayer(gradient)
+        animationLayers.insert(gradient)
     }
     
     private func setView() {

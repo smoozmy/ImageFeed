@@ -66,10 +66,12 @@ final class ImagesListViewController: UIViewController {
         }
     }
     
-    // MARK: - Actions
+    // MARK: - Config Cell
     
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         let photo = photos[indexPath.row]
+        
+        cell.startLoadingAnimation()
         
         let lowQualityURL = URL(string: photo.thumbImageURL)
         let highQualityURL = URL(string: photo.smallImageURL)
@@ -84,10 +86,11 @@ final class ImagesListViewController: UIViewController {
                 cell.imageCell.kf.setImage(with: highQualityURL) { result in
                     switch result {
                     case .success:
+                        cell.stopLoadingAnimation()
                         cell.rectangle.isHidden = false
                         cell.likeButton.isHidden = false
                         cell.dateLabel.isHidden = false
-                        cell.stubImageView.isHidden = true
+                        //                        cell.stubImageView.isHidden = true
                     case .failure(let error):
                         print("Ошибка загрузки изображения: \(error.localizedDescription)")
                     }
@@ -108,8 +111,9 @@ final class ImagesListViewController: UIViewController {
             cell.dateLabel.text = ""
         }
     }
-    
 }
+
+// MARK: - Extensions
 
 extension ImagesListViewController: UITableViewDataSource {
     
