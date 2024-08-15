@@ -1,7 +1,16 @@
 import UIKit
+import Kingfisher
+
+protocol SingleImageViewControllerDelegate: AnyObject {
+    func singleImageViewController(_ controller: SingleImageViewController, didUpdatePhoto photo: Photo)
+}
 
 final class SingleImageViewController: UIViewController {
     
+    weak var delegate: SingleImageViewControllerDelegate?
+    var photo: Photo?
+    private let imagesListService = ImagesListService.shared
+
     // MARK: - UI and Life Cycle
     
     private lazy var scrollView: UIScrollView = {
@@ -33,7 +42,6 @@ final class SingleImageViewController: UIViewController {
         element.setImage(UIImage(named: "LikeСircleNoActive"), for: .normal)
         element.addTarget(self, action: #selector(didTapLikeButton), for: .touchUpInside)
         element.translatesAutoresizingMaskIntoConstraints = false
-        element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
     
@@ -54,12 +62,31 @@ final class SingleImageViewController: UIViewController {
         return element
     }()
     
+    private lazy var stubImageView: UIImageView = {
+        let element = UIImageView()
+        element.image = UIImage(named: "Stub")
+        element.contentMode = .scaleAspectFit
+        element.translatesAutoresizingMaskIntoConstraints = false
+        return element
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
         
         setView()
         setupConstraints()
+    }
+    
+    override func viewIsAppearing(_ animated: Bool) {
+        super.viewIsAppearing(animated)
+        
+        if let photo = photo {
+            updateLikeButton(for: photo.isLiked)
+            if let url = URL(string: photo.largeImageURL) {
+                setImage(url: url)
+            }
+        }
     }
     
     private func setView() {
@@ -69,6 +96,7 @@ final class SingleImageViewController: UIViewController {
         singleImageButtonsStackView.addArrangedSubview(likeButton)
         singleImageButtonsStackView.addArrangedSubview(sharingButton)
         view.addSubview(backButton)
+        view.addSubview(stubImageView)
     }
     
     @objc private func didTapBackButton() {
@@ -82,15 +110,52 @@ final class SingleImageViewController: UIViewController {
     }
     
     @objc private func didTapLikeButton() {
+        guard let photo = photo else { return }
         
+        UIBlockingProgressHUD.show()
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+                switch result {
+                case .success:
+                    self?.photo?.isLiked.toggle()
+                    if let updatedPhoto = self?.photo {
+                        self?.delegate?.singleImageViewController(self!, didUpdatePhoto: updatedPhoto)
+                        self?.updateLikeButton(for: updatedPhoto.isLiked)
+                    }
+                case .failure(let error):
+                    print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    func setImage(url: URL) {
+        stubImageView.isHidden = false
+        imageView.image = nil
+        scrollView.zoomScale = 1.0
+        scrollView.contentSize = .zero
+        
+        let options: KingfisherOptionsInfo = [
+            .transition(.fade(0.3)),
+            .cacheOriginalImage
+        ]
+        imageView.kf.setImage(with: url, placeholder: nil, options: options) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.stubImageView.isHidden = true
+                switch result {
+                case .success(let value):
+                    self?.rescaleAndCenterImageInScrollView(image: value.image)
+                case .failure(let error):
+                    print("Ошибка загрузки полноразмерного изображения: \(error)")
+                }
+            }
+        }
     }
     
-    // MARK: - Public Methods
-    
-    func setImage(_ image: UIImage) {
-        imageView.image = image
-        view.layoutIfNeeded()
-        rescaleAndCenterImageInScrollView(image: image)
+    private func updateLikeButton(for isLiked: Bool) {
+        let likeImage = isLiked ? UIImage(named: "LikeСircleActive") : UIImage(named: "LikeСircleNoActive")
+        likeButton.setImage(likeImage, for: .normal)
     }
     
     // MARK: - Constraints
@@ -119,7 +184,12 @@ final class SingleImageViewController: UIViewController {
             singleImageButtonsStackView.heightAnchor.constraint(equalToConstant: 51),
             singleImageButtonsStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 68),
             singleImageButtonsStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -68),
-            singleImageButtonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            singleImageButtonsStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            
+            stubImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stubImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stubImageView.widthAnchor.constraint(equalToConstant: 83),
+            stubImageView.heightAnchor.constraint(equalToConstant: 75)
         ])
     }
     
