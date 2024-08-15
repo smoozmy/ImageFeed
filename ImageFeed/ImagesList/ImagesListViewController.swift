@@ -68,7 +68,7 @@ final class ImagesListViewController: UIViewController {
     
     // MARK: - Config Cell
     
-    func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         let photo = photos[indexPath.row]
         
         cell.startLoadingAnimation()
@@ -167,17 +167,25 @@ extension ImagesListViewController: UITableViewDelegate {
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        let photo = photos[indexPath.row]
+        var photo = photos[indexPath.row]
+        
+        photo.isLiked.toggle()
+        photos[indexPath.row] = photo
+        cell.setIsLiked(photo.isLiked)
         
         UIBlockingProgressHUD.show()
-        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+        imagesListService.changeLike(photoId: photo.id, isLike: photo.isLiked) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self = self else { return }
                 UIBlockingProgressHUD.dismiss()
+                
                 switch result {
                 case .success:
-                    self?.photos[indexPath.row].isLiked.toggle()
-                    cell.setIsLiked(self?.photos[indexPath.row].isLiked ?? false)
+                    break
                 case .failure(let error):
+                    photo.isLiked.toggle()
+                    self.photos[indexPath.row] = photo
+                    cell.setIsLiked(photo.isLiked)
                     print("Ошибка изменения состояния лайка: \(error.localizedDescription)")
                 }
             }

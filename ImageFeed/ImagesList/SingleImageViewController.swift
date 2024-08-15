@@ -76,6 +76,10 @@ final class SingleImageViewController: UIViewController {
         
         setView()
         setupConstraints()
+    }
+    
+    override func viewIsAppearing(_ animated: Bool) {
+        super.viewIsAppearing(animated)
         
         if let photo = photo {
             updateLikeButton(for: photo.isLiked)
@@ -134,7 +138,7 @@ final class SingleImageViewController: UIViewController {
         
         let options: KingfisherOptionsInfo = [
             .transition(.fade(0.3)),
-            .forceRefresh
+            .cacheOriginalImage
         ]
         imageView.kf.setImage(with: url, placeholder: nil, options: options) { [weak self] result in
             DispatchQueue.main.async {

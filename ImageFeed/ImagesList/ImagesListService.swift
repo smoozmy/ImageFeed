@@ -17,7 +17,7 @@ final class ImagesListService {
         isFetchingPhotos = true
 
         let nextPage = (lastLoadedPage ?? 0) + 1
-        var urlComponents = URLComponents(string: "https://api.unsplash.com/photos")
+        var urlComponents = URLComponents(string: "\(Constants.defaultBaseURL)photos")
         urlComponents?.queryItems = [
             URLQueryItem(name: "page", value: "\(nextPage)"),
             URLQueryItem(name: "per_page", value: "\(perPage)")
@@ -56,7 +56,7 @@ final class ImagesListService {
     
     func changeLike(photoId: String, isLike: Bool, completion: @escaping (Result<Void, Error>) -> Void) {
         let method = isLike ? "POST" : "DELETE"
-        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
+        guard let url = URL(string: "\(Constants.defaultBaseURL)photos/\(photoId)/like") else {
             completion(.failure(NetworkError.invalidRequest))
             return
         }

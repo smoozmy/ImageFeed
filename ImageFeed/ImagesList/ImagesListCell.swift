@@ -36,17 +36,10 @@ final class ImagesListCell: UITableViewCell {
         element.backgroundColor = .ypWhiteAlpha50
         element.layer.masksToBounds = true
         element.contentMode = .scaleAspectFill
+        element.isUserInteractionEnabled = true
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
-    
-    //    lazy var stubImageView: UIImageView = {
-    //        let element = UIImageView()
-    //        element.image = UIImage(named: "Stub")
-    //        element.contentMode = .scaleAspectFit
-    //        element.translatesAutoresizingMaskIntoConstraints = false
-    //        return element
-    //    }()
     
     lazy var likeButton: UIButton = {
         let element = UIButton(type: .custom)
@@ -67,17 +60,15 @@ final class ImagesListCell: UITableViewCell {
     }
     
     private func setView() {
-        addSubview(imageCell)
+        contentView.addSubview(imageCell)
         imageCell.addSubview(rectangle)
         imageCell.addSubview(likeButton)
         imageCell.addSubview(dateLabel)
-        //        imageCell.addSubview(stubImageView)
     }
     
     override func prepareForReuse() {
         super.prepareForReuse()
         imageCell.kf.cancelDownloadTask()
-        //        stubImageView.isHidden = false
         for layer in animationLayers {
             layer.removeFromSuperlayer()
         }
@@ -134,8 +125,10 @@ final class ImagesListCell: UITableViewCell {
         animationLayers.insert(gradient)
     }
     
-    @objc private func likeButtonClicked() {
+    @objc func likeButtonClicked() {
+        UIBlockingProgressHUD.show()
         delegate?.imageListCellDidTapLike(self)
+        UIBlockingProgressHUD.dismiss()
     }
     
     func setIsLiked(_ isLiked: Bool) {
@@ -160,12 +153,7 @@ final class ImagesListCell: UITableViewCell {
             dateLabel.bottomAnchor.constraint(equalTo: imageCell.bottomAnchor, constant: -8),
             
             likeButton.trailingAnchor.constraint(equalTo: imageCell.trailingAnchor),
-            likeButton.topAnchor.constraint(equalTo: imageCell.topAnchor),
-            
-            //            stubImageView.centerXAnchor.constraint(equalTo: imageCell.centerXAnchor),
-            //            stubImageView.centerYAnchor.constraint(equalTo: imageCell.centerYAnchor),
-            //            stubImageView.widthAnchor.constraint(equalToConstant: 83),
-            //            stubImageView.heightAnchor.constraint(equalToConstant: 75)
+            likeButton.topAnchor.constraint(equalTo: imageCell.topAnchor)
         ])
     }
 }
