@@ -28,8 +28,6 @@ final class AuthViewController: UIViewController {
         return element
     }()
     
-    // MARK: - UI and Life Cycle
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
@@ -43,12 +41,16 @@ final class AuthViewController: UIViewController {
         view.addSubview(loginButton)
     }
     
-    // MARK: - Actions
-    
     @objc private func didTapLoginButton() {
-        let webViewController = WebViewViewController()
-        webViewController.delegate = self
-        navigationController?.pushViewController(webViewController, animated: true)
+        let webViewViewController = WebViewViewController()
+        
+        let authHelper = AuthHelper()
+        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+        webViewViewController.presenter = webViewPresenter
+        webViewPresenter.view = webViewViewController
+        
+        webViewViewController.delegate = self
+        navigationController?.pushViewController(webViewViewController, animated: true)
     }
     
     private func configureBackButton() {
