@@ -58,6 +58,7 @@ final class SingleImageViewController: UIViewController {
         element.setImage(UIImage(systemName: "chevron.left"), for: .normal)
         element.tintColor = .ypWhite
         element.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+        element.accessibilityIdentifier = "Back Button"
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()

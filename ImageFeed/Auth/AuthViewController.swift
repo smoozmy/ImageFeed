@@ -24,6 +24,7 @@ final class AuthViewController: UIViewController {
         element.layer.cornerRadius = 16
         element.layer.masksToBounds = true
         element.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
+        element.accessibilityIdentifier = "Authenticate" 
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
