@@ -24,11 +24,10 @@ final class AuthViewController: UIViewController {
         element.layer.cornerRadius = 16
         element.layer.masksToBounds = true
         element.addTarget(self, action: #selector(didTapLoginButton), for: .touchUpInside)
+        element.accessibilityIdentifier = "Authenticate" 
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
-    
-    // MARK: - UI and Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,12 +42,16 @@ final class AuthViewController: UIViewController {
         view.addSubview(loginButton)
     }
     
-    // MARK: - Actions
-    
     @objc private func didTapLoginButton() {
-        let webViewController = WebViewViewController()
-        webViewController.delegate = self
-        navigationController?.pushViewController(webViewController, animated: true)
+        let webViewViewController = WebViewViewController()
+        
+        let authHelper = AuthHelper()
+        let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+        webViewViewController.presenter = webViewPresenter
+        webViewPresenter.view = webViewViewController
+        
+        webViewViewController.delegate = self
+        navigationController?.pushViewController(webViewViewController, animated: true)
     }
     
     private func configureBackButton() {

@@ -57,6 +57,7 @@ final class ProfileViewController: UIViewController {
         let element = UIButton(type: .custom)
         element.setImage(UIImage(named: "Logout"), for: .normal)
         element.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+        element.accessibilityIdentifier = "Logout Button"
         element.translatesAutoresizingMaskIntoConstraints = false
         return element
     }()
@@ -222,6 +223,7 @@ final class ProfileViewController: UIViewController {
         let confirmAction = UIAlertAction(title: "Да", style: .default) { _ in
             ProfileLogoutService.shared.logout()
         }
+        confirmAction.accessibilityIdentifier = "Yes"
         
         let cancelAction = UIAlertAction(title: "Нет", style: .cancel, handler: nil)
         
